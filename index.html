@@ -4,7 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arcade Battle | Multiplayer & Bots</title>
+  <title>Tessera | Bingo • SOS • Dots & Boxes • Tic-Tac-Toe</title>
+  
+  <link rel="icon" 
+    href="http://demovajib.free.nf/wp-content/uploads/2026/10/Tessera-Game-Icon-1-1.png" 
+    type="image/x-icon">
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     :root {
@@ -527,9 +531,98 @@
     #extraGrid:not(.dots-grid) {padding:12px;border:1px solid #ffffff22;border-radius:20px;background:linear-gradient(155deg,#253366,#121933);box-shadow:0 20px 55px #0006}
     #extraGrid .ttt-cell {transition:background .2s,transform .15s;box-shadow:inset 0 1px 2px #ffffff19}
     #extraGrid .ttt-cell:hover:not(:disabled){background:#31457e;transform:scale(1.04)}
-    #extraGrid .ttt-cell.oldest {outline:3px dashed #fbbf24;outline-offset:-7px;position:relative}
-    #extraGrid .ttt-cell.oldest::after {content:'1ST';position:absolute;bottom:5px;right:6px;font-size:.53rem;letter-spacing:1px;color:#fbbf24}
+    #extraGrid .ttt-cell.warning {animation:piece-warning .85s ease-in-out 1}
+    @keyframes piece-warning {0%,100%{opacity:1;transform:scale(1)}45%{opacity:.35;transform:scale(.86);box-shadow:0 0 26px #fbbf24}}
     #extraGrid .ttt-cell.win {background:#fbbf2429;box-shadow:0 0 0 3px #fbbf24,0 0 24px #fbbf2466}
+    .lobby-score {background:#141b3d}.lobby-score .lobby-inner {gap:14px}
+    .overlay {overflow-y:auto;justify-content:flex-start;padding:22px 10px}
+    .overlay h2 {font-size:clamp(2rem,6vw,4rem);letter-spacing:4px}
+    .score-wrap {width:100%;overflow-x:auto;border:1px solid #ffffff27;border-radius:12px}
+    .score-table {width:100%;border-collapse:collapse;text-align:left;font-size:.83rem;min-width:480px}
+    .score-table th {background:#22244e;color:#fbbf24;font-size:.72rem;text-transform:uppercase;letter-spacing:1px}
+    .score-table td,.score-table th {padding:10px 12px;border-bottom:1px solid #ffffff1b}
+    .score-table tbody tr:nth-child(even) {background:#ffffff0c}
+    .score-table td:first-child {font-weight:800}.score-table tr:last-child td {border-bottom:0}
+    .score-title {font-size:.96rem;margin:8px 0 4px}
+    .result-notice {background:#1b2754;border:1px solid #fbbf24;padding:12px 18px;text-align:center;border-radius:12px;color:#ffe5a0;max-width:95vw;font-weight:800}
+    .result-boards {width:min(620px,94vw);max-height:42dvh;overflow:auto;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .result-card {border:1px solid #ffffff55;border-radius:14px;padding:10px;background:#161e40;text-align:center;max-width:100%;overflow:auto}
+    .result-card h3 {font-size:1rem;letter-spacing:1px;margin-bottom:8px}
+    .result-grid {display:grid;gap:3px;width:max-content;margin:auto}
+    .result-cell {width:clamp(26px,7vw,38px);height:clamp(26px,7vw,38px);display:grid;place-items:center;background:#263358;border:1px solid #ffffff3d;border-radius:5px;font-size:.78rem;font-weight:800}
+    .result-grid.ten .result-cell {width:clamp(24px,6vw,33px);height:clamp(24px,6vw,33px)}
+    .result-cell.called {background:#fbbf24;color:#10142c;border-color:#fbbf24}
+    @media(max-width:600px){.score-table {min-width:0;font-size:.75rem}.score-table td,.score-table th {padding:7px 5px}.score-table .optional {display:none}}
+    .timer-ring {--timer-color:#34d399;position:relative;display:grid;place-items:center;width:52px;height:52px;flex:none;border-radius:50%;background:#101a3b;color:#fff;font-variant-numeric:tabular-nums}
+    .timer-ring svg {position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+    .timer-track,.timer-arc {fill:none;stroke-width:4}
+    .timer-track {stroke:#ffffff33}
+    .timer-arc {stroke:var(--timer-color);stroke-linecap:round;stroke-dasharray:131.95;stroke-dashoffset:0;transition:stroke-dashoffset .22s linear,stroke .25s ease}
+    .timer-ring span {font-size:.85rem;font-weight:900;line-height:1;z-index:1}
+    .timer-ring.warning {--timer-color:#fbbf24}
+    .timer-ring.urgent {--timer-color:#fb4b5c}
+    .timer-ring.urgent .timer-arc {filter:drop-shadow(0 0 3px #fb4b5c)}
+    .timer-ring.waiting {--timer-color:#8893b6}
+    .timer-ring.waiting span {font-size:.58rem}
+    .icon-control {display:grid;place-items:center;flex:none;width:46px;height:46px;padding:0;border-radius:50%;border:1px solid #ffffff66;background:#ffffff12;color:#fff;cursor:pointer;touch-action:manipulation}
+    .icon-control svg {width:20px;height:20px;fill:currentColor}
+    .icon-control:hover,.icon-control:focus-visible {border-color:#fbbf24;background:#fbbf2422;color:#fbbf24}
+    .play-control {width:66px;height:66px;background:#fbbf24;color:#10142c;border:0}.play-control svg {width:28px;height:28px;margin-left:3px}
+    @media(max-width:600px){
+      #gameScreen .top-bar {display:grid;grid-template-columns:56px minmax(0,1fr) 50px 44px;gap:5px;align-items:center;justify-items:center;padding:7px 6px;box-sizing:border-box}
+      #gameScreen .back-mini {grid-column:1;grid-row:1;min-width:0;width:100%;font-size:.67rem;padding:8px 2px}
+      #gameScreen #turnPill {grid-column:2;grid-row:1;width:100%;max-width:none;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:.69rem;padding:8px 4px}
+      #gameScreen #timerPill {grid-column:3;grid-row:1;width:48px;height:48px}
+      #gameScreen #pauseButton {grid-column:4;grid-row:1;width:42px;height:42px}
+      #gameScreen #gameRoom {grid-column:1/3;grid-row:2;justify-self:stretch;min-width:0;min-height:30px;font-size:.65rem;overflow:hidden;white-space:nowrap}
+      #gameScreen #calledPill {grid-column:3/5;grid-row:2;justify-self:stretch;min-height:30px;font-size:.62rem;white-space:nowrap}
+      #gameScreen .top-bar:has(#pauseButton.hidden) {grid-template-columns:56px minmax(0,1fr) 50px}
+      #gameScreen .top-bar:has(#pauseButton.hidden) #gameRoom {grid-column:1/-1;grid-row:2}
+      #gameScreen .top-bar:has(#pauseButton.hidden) #calledPill {display:none}
+      #gameScreen #gameRoom.hidden ~ #calledPill {grid-column:1/-1;justify-self:center}
+      #gameScreen .top-bar:not(:has(#gameRoom:not(.hidden))) #calledPill {grid-column:1/-1;justify-self:center}
+    }
+    .chat-widget {position:fixed;bottom:max(18px,env(safe-area-inset-bottom));right:max(18px,env(safe-area-inset-right));z-index:60}
+    .chat-launch {position:relative;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;border:1px solid #ffffff66;background:#fbbf24;color:#151b35;box-shadow:0 10px 30px #000a;cursor:pointer}
+    .chat-launch svg {width:27px;height:27px;fill:currentColor}
+    .chat-badge {position:absolute;top:-5px;right:-4px;border-radius:999px;padding:3px 7px;min-width:22px;background:#fb4b5c;color:white;font-size:.7rem;font-weight:900}
+    .chat-panel {position:absolute;right:0;bottom:70px;width:min(350px,calc(100vw - 24px));height:min(450px,65dvh);background:#151f43;border:1px solid #ffffff66;border-radius:16px;display:flex;flex-direction:column;box-shadow:0 18px 65px #000b;overflow:hidden}
+    .chat-head {display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #ffffff33}
+    .chat-head strong,.chat-head small {display:block}.chat-head small {font-size:.7rem;color:#b9c5e7}
+    .chat-close {border:0;background:transparent;color:white;font-size:1.8rem;cursor:pointer;line-height:1;min-width:34px;min-height:34px}
+    .chat-messages {flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;overscroll-behavior:contain}
+    .chat-empty {font-size:.82rem;opacity:.65;text-align:center;margin:auto}
+    .chat-message {max-width:85%;padding:7px 10px;border-radius:12px;background:#293b6e;overflow-wrap:anywhere;align-self:flex-start}
+    .chat-message.mine {align-self:flex-end;background:#785c1b}
+    .chat-message .who {display:block;font-size:.69rem;font-weight:900;opacity:.85}
+    .chat-message .text {white-space:pre-wrap;font-size:.88rem;line-height:1.35}
+    .chat-message .time {display:block;text-align:right;font-size:.63rem;opacity:.6;margin-top:3px}
+    .chat-form {display:flex;gap:8px;padding:10px;border-top:1px solid #ffffff33;background:#101735}
+    .chat-form input {flex:1;min-width:0;background:#ffffff14;border:1px solid #ffffff55;border-radius:10px;color:white;font:inherit;font-size:.87rem;padding:10px}
+    .chat-form input::placeholder {color:#b4bad1}.chat-form button {width:42px;border:0;border-radius:10px;background:#fbbf24;color:#10142c;font-size:1.2rem;cursor:pointer}
+    @media(max-width:600px){.chat-widget {bottom:max(12px,env(safe-area-inset-bottom));right:max(12px,env(safe-area-inset-right))}.chat-panel {bottom:65px;height:min(430px,68dvh)}.chat-launch {width:52px;height:52px}.back-mini {border-radius:50%}#gameScreen .back-mini {width:42px;height:42px;padding:0}}
+    .back-btn {align-self:flex-start;min-height:42px;padding:9px 18px}
+    .back-mini {background:#ffffff13;color:white;cursor:pointer;min-height:40px;letter-spacing:0}
+    .room-fields {display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:14px 0;text-align:left}
+    .room-fields label {font-size:.85rem;color:#d9def3}.room-fields select{width:100%;margin-top:6px}
+    .room-proposal {border:1px solid #ffffff44;background:#101a3a;padding:14px;border-radius:12px;margin-top:14px;min-height:52px}
+    .rules-overlay {position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#060917f7;z-index:90;padding:16px}
+    .rules-overlay.show {display:flex}.rules-card {width:min(460px,100%);padding:26px;background:#1c2858;border:1px solid #ffffff4d;border-radius:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px}
+    .rules-card h2 {font-size:1.7rem}.rules-card p {line-height:1.5}.rules-card .eyebrow{letter-spacing:3px;color:#fbbf24}
+    @media(max-width:600px){
+      #gameScreen .top-bar {position:sticky;top:0;z-index:30;background:#10183cf2;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:7px 5px;border:1px solid #ffffff33;border-radius:0 0 14px 14px;width:calc(100% + 16px);margin:-12px -8px 2px}
+      #gameScreen #modeInfo {display:none}
+      #gameScreen #turnPill {flex:1 1 auto;text-align:center;max-width:56vw}
+      #gameScreen .info-pill {letter-spacing:0;font-size:.72rem;padding:8px}
+      .board-card {padding:10px 5px 12px;width:100%}
+      .bingo-grid.ten,.manual-grid.ten {grid-template-columns:repeat(10,29px);gap:2px}
+      .bingo-grid.ten .game-cell,.manual-grid.ten .manual-cell {width:29px;height:29px;font-size:.7rem}
+      .panel-body {padding:0 10px 18px}
+      .dots-grid.large .edge.h,.dots-grid.large .box {width:clamp(21px,6vw,27px)}
+      .dots-grid.large .edge.v,.dots-grid.large .box {height:clamp(21px,6vw,27px)}
+      .dots-grid.large .edge.v {width:7px}.dots-grid.large .dot {width:7px;height:7px}
+    }
+    #extraHelp {display:none}
     .lobby-card {width:min(960px,calc(100% - 16px))}
     .lobby-inner {display:grid;gap:18px;padding:clamp(16px,3vw,34px)}
     .lobby-heading {text-align:left;padding:4px 4px 8px}
@@ -614,6 +707,74 @@
     .hidden {
       display: none !important;
     }
+    /* Last-in-cascade mobile overrides: no side-scrolling boards or page. */
+    html,body {max-width:100%;overflow-x:clip}
+    @media(max-width:600px){
+      .screen {max-width:100vw;min-width:0}
+      #gameScreen .top-bar {width:100%;margin:-12px 0 2px}
+      #extraArea,#sosArea {max-width:100%;min-width:0}
+      .extra-scroll,.sos-scroll {overflow-x:hidden;max-width:100%}
+      #extraGrid.dots-grid.large .edge.h,#extraGrid.dots-grid.large .box {width:var(--dot-box)}
+      #extraGrid.dots-grid.large .edge.v,#extraGrid.dots-grid.large .box {height:var(--dot-box)}
+      #extraGrid.dots-grid.large .edge.v,#extraGrid.dots-grid.large .dot {width:var(--dot-gap)}
+      #extraGrid.dots-grid.large .dot {height:var(--dot-gap)}
+      #extraGrid.dots-grid.large .edge.h {height:var(--dot-gap)}
+      #extraGrid.dots-grid.large .box {font-size:clamp(.75rem,3vw,.95rem)}
+    }
+    /* Shared score-card design for SOS and Dots & Boxes. */
+    .score-strip {display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:8px;width:min(650px,100%);margin:14px auto 10px}
+    .score-card,.score-total {display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-width:0;min-height:78px;border-radius:14px;padding:10px 12px;text-align:left}
+    .score-card {flex:1 1 112px;max-width:210px;background:#1c2e58;border:1px solid #385575;border-left:4px solid var(--p1);overflow-wrap:anywhere}
+    .score-card.player-2 {background:#332339;border-color:#644354;border-left-color:var(--p2)}
+    .score-card.playing {box-shadow:0 0 0 2px #ffffff80,0 0 20px #38bdf844}
+    .score-card.player-2.playing {box-shadow:0 0 0 2px #ffffff80,0 0 20px #fb718544}
+    .score-name {color:#d9e5ff;font-size:.78rem;font-weight:800;line-height:1.1}
+    .score-count {font-size:clamp(1.25rem,4vw,1.8rem);line-height:1.15;margin-top:3px}
+    .score-unit {font-size:.72rem;color:#b9c9e2}
+    .score-status {font-size:.62rem;letter-spacing:1px;font-weight:900;color:#fbbf24;min-height:1em;margin-top:4px}
+    .score-total {flex:0 1 110px;background:linear-gradient(155deg,#463818,#29243d);border:1px solid #fbbf24;color:#ffe7a9}
+    .score-total span {font-size:.66rem;font-weight:900;letter-spacing:1px}
+    .score-total strong {font-size:1.55rem;line-height:1.1;margin-top:2px}
+    .score-total small {font-size:.64rem;color:#e5d7ac}
+    #extraGrid .box.taken-p1 {background:linear-gradient(140deg,#15638b,#124460);border:1px solid #38bdf8;color:#e6faff;box-shadow:inset 0 0 0 1px #38bdf855}
+    #extraGrid .box.taken-p2 {background:linear-gradient(140deg,#90344d,#552139);border:1px solid #fb7185;color:#fff1f4;box-shadow:inset 0 0 0 1px #fb718555}
+    @media(max-width:600px){
+      #gameScreen .top-bar {border-radius:14px;margin:0 0 2px}
+      .score-strip {width:100%;gap:6px;padding:0 6px}
+      .score-card {flex:1 1 96px;min-height:70px;padding:8px}
+      .score-total {flex:1 1 90px;min-height:70px;padding:8px}
+      .score-name {font-size:.7rem}.score-count {font-size:1.3rem}
+    }
+    /* Compact, single-line score chips instead of large score cards. */
+    .score-strip {gap:6px;margin:10px auto}
+    .score-card,.score-total {display:inline-flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;flex:0 1 auto;min-width:0;min-height:0;max-width:100%;padding:7px 10px;border-radius:999px;text-align:center}
+    .score-card {max-width:none;border-left-width:2px;background:#1c2e58}
+    .score-card.player-2 {background:#332339}
+    .score-name {font-size:.78rem;line-height:1.2;max-width:150px;overflow-wrap:anywhere}
+    .score-count {font-size:.85rem;line-height:1.2;margin:0}
+    .score-unit {font-size:.78rem;line-height:1.2;color:#d8e5fa}
+    .score-total {max-width:none;border:1px solid #fbbf24;background:#3b311d}
+    .score-total span,.score-total small {font-size:.72rem;letter-spacing:0;line-height:1.2}
+    .score-total strong {font-size:.85rem;line-height:1.2;margin:0}
+    @media(max-width:600px){
+      .score-strip {gap:5px;padding:0 3px}
+      .score-card,.score-total {flex:0 1 auto;min-height:0;padding:6px 8px}
+      .score-name,.score-unit,.score-total span,.score-total small {font-size:.7rem}
+      .score-count,.score-total strong {font-size:.78rem}
+    }
+    .about-link {align-self:flex-start;border-color:#fbbf2477;color:#fbbf24}
+    .about-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .about-tile {border:1px solid #ffffff28;border-radius:16px;padding:20px;background:#ffffff0b;text-align:left}
+    .about-icon {display:inline-grid;place-items:center;background:#fbbf2422;color:#fbbf24;border-radius:10px;width:34px;height:34px;font-size:.75rem;font-weight:900}
+    .about-tile h3 {margin:12px 0 8px;color:#fff;font-size:1.1rem}.about-tile p,.about-note {color:#c3cbe0;line-height:1.55;font-size:.9rem}
+    .about-note {margin-top:10px}
+    .about-credit {display:flex;align-items:center;flex-wrap:wrap;gap:16px;padding:18px 20px;border-radius:16px;border:1px solid #fbbf2455;background:#fbbf2410}
+    .about-credit > div {display:flex;flex-direction:column;gap:4px;min-width:145px}
+    .about-credit .eyebrow {color:#fbbf24;letter-spacing:2px;font-size:.69rem;font-weight:900}
+    .about-credit strong {font-size:1.02rem}
+    .about-credit a {color:#fbbf24;font-weight:800;text-decoration:none;border-bottom:1px solid #fbbf24;margin-left:auto;overflow-wrap:anywhere}
+    .about-credit a:hover,.about-credit a:focus-visible {color:#fff;border-color:#fff}
+    @media(max-width:600px){.about-grid {grid-template-columns:1fr}.about-tile{padding:16px}.about-credit a {margin-left:0}}
   </style>
 </head>
 
@@ -654,17 +815,58 @@
           <button class="btn" onclick="showOnlineMenu()">Online multiplayer</button>
           <div class="bot-action"><select id="botDifficulty" class="config-select" aria-label="Bot difficulty"><option value="easy">Easy bot</option><option value="medium">Medium bot</option><option value="hard">Hard bot</option></select><button class="btn" onclick="startBot()">Play bot</button></div>
         </div>
-        <div class="id-box" id="onlineMenu"><div class="btn-grid">
+        <div class="id-box" id="onlineMenu"><button class="btn back-btn" onclick="document.getElementById('onlineMenu').classList.remove('show')">← Back</button><div class="btn-grid">
           <button class="btn gold" onclick="createRoom()">Create room</button><button class="btn" onclick="showJoin()">Join room</button>
         </div><div class="id-box" id="createBox"><p>Your room ID</p><div class="room-id" id="roomIdText">------</div><p>Share this ID with Player 2</p></div>
         <div class="id-box" id="joinBox"><input class="input" id="joinInput" maxlength="6" placeholder="ENTER ID" autocomplete="off" aria-label="Room ID"><button class="btn gold" onclick="joinRoom()">Connect</button></div>
         <div class="status-pill" id="connStatus">Waiting for action</div></div>
       </div>
     </div></div>
+    <div class="glass-card lobby-card lobby-score"><div class="lobby-inner">
+      <div class="section-heading"><span class="step">★</span><div><h3>Scoreboard</h3><p>Results saved on this device</p></div></div>
+      <div id="mainScores" aria-live="polite"></div>
+      <button class="btn" onclick="downloadScores()">Download scores CSV</button>
+      <button class="btn about-link" onclick="showScreen('aboutScreen')">About Arcade Battle →</button>
+    </div></div>
   </section>
+
+  <!-- ABOUT -->
+  <section class="screen" id="aboutScreen">
+    <div class="glass-card lobby-card"><div class="lobby-inner">
+      <button class="btn back-btn" onclick="showScreen('lobbyScreen')" aria-label="Back to home">← Back to home</button>
+      <div class="lobby-heading"><span class="eyebrow">ABOUT THE GAME</span><h2>Arcade Battle</h2><p>Four games. Three ways to play. One shared room for your next challenge.</p></div>
+      <div class="about-grid">
+        <article class="about-tile"><span class="about-icon">01</span><h3>Bingo Battle</h3><p>Arrange a private 5×5 or 10×10 board with unique numbers. Each called number marks both players’ boards; complete five lines to win. If both reach five lines on the same call, the round is a draw.</p></article>
+        <article class="about-tile"><span class="about-icon">02</span><h3>SOS</h3><p>Choose a 5×5 or 10×10 grid. Place S or O to build S-O-S horizontally, vertically, or diagonally. Each new word scores a point and earns another turn.</p></article>
+        <article class="about-tile"><span class="about-icon">03</span><h3>Dots &amp; Boxes</h3><p>Connect neighboring dots and claim completed boxes. Closing a box scores a point and lets you play again. Choose a 3×3, 4×4, 5×5, or 10×10 box grid.</p></article>
+        <article class="about-tile"><span class="about-icon">04</span><h3>Disappearing Tic-Tac-Toe</h3><p>Keep at most three pieces per player. When you place a fourth, your oldest disappears. Make three in a row before your marks vanish.</p></article>
+      </div>
+      <div class="lobby-section"><h3>Ways to play</h3><p>Play together on one device, challenge an Easy/Medium/Hard bot, or connect two devices in an online room. Online players can switch games in the same room and chat directly with each other. Select a 15-second, 30-second, or 1-minute turn timer.</p><p class="about-note">Online rooms and chat require an internet connection. Score history is stored in each browser, not in a central account.</p></div>
+      <div class="about-credit"><div><span class="eyebrow">VERSION</span><strong>V2.5</strong></div><div><span class="eyebrow">DEVELOPER</span><strong>Shaikh Vajib</strong></div><a href="https://github.com/shaikhvajib" target="_blank" rel="noopener noreferrer" aria-label="Shaikh Vajib on GitHub (opens in new tab)">Developer GitHub ↗</a></div>
+    </div></div>
+  </section>
+
+  <!-- SHARED ONLINE ROOM -->
+  <section class="screen" id="roomScreen"><div class="glass-card lobby-card"><div class="lobby-inner">
+    <div class="lobby-heading"><span class="eyebrow">CONNECTED ROOM</span><h2>Pick your next game</h2><p>One room ID for the whole match. Either player may suggest a game; the other accepts.</p></div>
+    <div class="lobby-section"><div class="section-heading"><span class="step">★</span><div><h3>Room <span id="sharedRoomCode"></span></h3><p id="sharedPlayers">Waiting for player…</p></div></div>
+      <div class="btn-grid"><button class="btn" onclick="copyRoom()">Copy room ID</button><button class="btn" onclick="leaveGame()">← Leave room</button></div>
+    </div>
+    <div class="lobby-section"><h3>Suggest a game</h3><div class="room-fields">
+      <label>Game<select id="roomGame" class="config-select" onchange="updateRoomFields()"><option value="bingo">Bingo</option><option value="sos">SOS</option><option value="dots">Dots &amp; Boxes</option><option value="ttt">Tic-Tac-Toe</option></select></label>
+      <label>Turn time<select id="roomTimer" class="config-select"><option value="15">15 sec</option><option value="30">30 sec</option><option value="60">1 min</option></select></label>
+      <label class="room-bingo">Bingo board<select id="roomBingo" class="config-select"><option value="5">5 × 5</option><option value="10">10 × 10</option></select></label>
+      <label class="room-sos hidden">SOS board<select id="roomSos" class="config-select"><option value="5">5 × 5</option><option value="10">10 × 10</option></select></label>
+      <label class="room-dots hidden">Dots grid<select id="roomDots" class="config-select"><option value="3">3 × 3</option><option value="4">4 × 4</option><option value="5">5 × 5</option><option value="10">10 × 10</option></select></label>
+    </div><button class="btn gold" id="proposeButton" onclick="proposeGame()">Suggest game</button>
+    <div class="room-proposal" id="roomProposal" aria-live="polite">Waiting for a game suggestion.</div>
+    <div class="btn-grid"><button class="btn gold hidden" id="acceptButton" onclick="acceptGame()">Accept &amp; play</button><button class="btn hidden" id="declineButton" onclick="declineGame()">Decline</button></div>
+    </div>
+  </div></div></section>
 
   <!-- BOARD SETUP -->
   <section class="screen" id="setupScreen">
+    <button class="btn back-btn" onclick="backStep()">← Back</button>
     <div class="top-bar">
       <div class="status-pill" id="setupInfo">Arrange your 5x5 Bingo Board using numbers 1 – 25</div>
       <div class="status-pill" id="readyStatus">Waiting for both players to confirm board</div>
@@ -704,19 +906,23 @@
   <!-- GAME SCREEN -->
   <section class="screen" id="gameScreen">
     <div class="top-bar">
+      <button type="button" class="icon-control back-mini" onclick="backStep()" aria-label="Back to room or lobby" title="Back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 4.5 8 12l7.5 7.5-1.8 1.8L4.4 12l9.3-9.3z"/></svg></button>
       <div class="info-pill" id="modeInfo">MODE: SAME PC</div>
       <div class="info-pill turn" id="turnPill">YOUR TURN</div>
-      <div class="info-pill" id="timerPill">15s</div>
-      <button type="button" class="info-pill room-copy" id="pauseButton" onclick="pauseGame()">Ⅱ Pause</button>
+      <div class="timer-ring" id="timerPill" role="progressbar" aria-label="Time remaining" aria-valuemin="0" aria-valuemax="15" aria-valuenow="15">
+        <svg viewBox="0 0 52 52" aria-hidden="true"><circle class="timer-track" cx="26" cy="26" r="21"/><circle class="timer-arc" id="timerArc" cx="26" cy="26" r="21"/></svg>
+        <span id="timerValue">15</span>
+      </div>
+      <button type="button" class="icon-control" id="pauseButton" onclick="pauseGame()" aria-label="Pause game" title="Pause game"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
       <button class="info-pill room-copy hidden" id="gameRoom" onclick="copyRoom()" title="Copy room ID">ROOM: <span id="gameRoomCode"></span> ⧉</button>
-      <div class="info-pill">LAST CALLED: <span id="lastCalled">—</span></div>
+      <div class="info-pill" id="calledPill">LAST CALLED: <span id="lastCalled">—</span></div>
     </div>
     <div id="sosArea" class="hidden" style="text-align:center;width:min(650px,95vw);margin:auto">
       <h2 style="margin:12px">SOS • <span id="sosNames"></span></h2>
-      <p style="margin:12px">Place S or O. Blue = S, gold = O, dark = empty. Completed SOS lines glow cyan for Player 1 or pink for Player 2. Each earns a point and another turn.</p>
+
       <div class="btn-grid" style="margin:16px"><button class="btn gold" id="letterS" onclick="chooseLetter('S')">S</button><button class="btn" id="letterO" onclick="chooseLetter('O')">O</button></div>
-<div class="sos-scroll"><div class="sos-stage" id="sosStage"><div id="sosGrid" role="grid" aria-label="SOS board"></div><svg id="sosLines" aria-hidden="true"></svg></div></div>
-      <p id="sosPoints"></p>
+      <div id="sosPoints" aria-live="polite"></div>
+      <div class="sos-scroll"><div class="sos-stage" id="sosStage"><div id="sosGrid" role="grid" aria-label="SOS board"></div><svg id="sosLines" aria-hidden="true"></svg></div></div>
     </div>
     <div id="extraArea" class="hidden" style="width:min(650px,100%);text-align:center">
       <h2 id="extraTitle"></h2><p id="extraHelp" style="margin:8px auto;opacity:.75"></p>
@@ -747,20 +953,31 @@
         </div>
       </div>
     </div>
+    <div id="resultNotice" class="result-notice hidden" aria-live="polite"></div>
     <div class="called-panel" id="bingoCalls">
       <h3 style="letter-spacing: 3px; text-transform: uppercase; opacity: .7;">Called Numbers Live • Each call marks both boards</h3>
       <div class="called-list" id="calledList"></div>
     </div>
-    <button class="btn" onclick="leaveGame()">Back to Lobby</button>
+    <button class="btn" onclick="backStep()">← Back</button>
   </section>
 
-  <div class="pause-overlay" id="pauseOverlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" aria-hidden="true"><div class="pause-card"><span class="eyebrow">TAKE A BREAK</span><h2 id="pauseTitle">Game paused</h2><p>The board is hidden and the clock is stopped.</p><button class="btn gold" onclick="resumeGame()">Resume game</button></div></div>
+  <div class="chat-widget hidden" id="chatWidget">
+    <button type="button" class="chat-launch" id="chatToggle" onclick="toggleChat()" aria-label="Open room chat" aria-expanded="false" aria-controls="chatPanel" title="Room chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 3v-3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm1 3v9h14V7H5Z"/></svg><span class="chat-badge hidden" id="chatBadge">0</span></button>
+    <section class="chat-panel hidden" id="chatPanel" role="dialog" aria-modal="false" aria-label="Room chat">
+      <div class="chat-head"><div><strong>Room chat</strong><small id="chatSubtitle">Only players in this room</small></div><button type="button" class="chat-close" onclick="toggleChat(false)" aria-label="Close chat">×</button></div>
+      <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-relevant="additions"><p class="chat-empty">Messages are shared only with your current opponent.</p></div>
+      <form id="chatForm" class="chat-form" onsubmit="sendChat(event)"><input id="chatInput" maxlength="400" autocomplete="off" placeholder="Write a message…" aria-label="Chat message"><button type="submit" aria-label="Send message">➤</button></form>
+    </section>
+  </div>
+  <div class="rules-overlay" id="rulesOverlay" role="dialog" aria-modal="true" aria-labelledby="rulesTitle" aria-hidden="true"><div class="rules-card"><button class="btn back-btn" onclick="backStep()">← Back</button><span class="eyebrow">HOW TO PLAY</span><h2 id="rulesTitle"></h2><p id="rulesText"></p><p id="rulesWait" aria-live="polite"></p><button class="btn gold" id="rulesReadyButton" onclick="readyForGame()">Ready to play</button></div></div>
+  <div class="pause-overlay" id="pauseOverlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" aria-hidden="true"><div class="pause-card"><span class="eyebrow">TAKE A BREAK</span><h2 id="pauseTitle">Game paused</h2><p>The board is hidden and the clock is stopped.</p><button class="icon-control play-control" onclick="resumeGame()" aria-label="Resume game" title="Resume game"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg></button></div></div>
   <div class="overlay" id="winOverlay">
     <p style="letter-spacing: 14px; text-transform: uppercase; opacity: .6;">B I N G O</p>
     <h2 id="winnerText">PLAYER 1 WINS</h2>
+    <div id="resultBoards" class="result-boards hidden"></div>
     <div id="scoreboard" style="max-height:40vh;overflow:auto;width:min(560px,90vw);padding:16px;border:1px solid #ffffff55;border-radius:16px;background:#101632;text-align:center"></div>
     <div id="rematchStatus" style="color:#fbbf24;margin:10px">Choose Play Again to request the next round.</div>
-    <div class="btn-grid"><button class="btn gold" id="rematchBtn" onclick="readyRematch()">Play Again • Ready</button><button class="btn" onclick="downloadScores()">Download Scores CSV</button><button class="btn" onclick="leaveGame()">Leave Match</button></div>
+    <div class="btn-grid"><button class="btn gold" id="rematchBtn" onclick="readyRematch()">Play Again • Ready</button><button class="btn" onclick="downloadScores()">Download Scores CSV</button><button class="btn" onclick="backStep()">← Back</button></div>
   </div>
 
   <script>
@@ -799,8 +1016,11 @@
     let deadline = 0, timerHandle = null, turnSeconds = 15, clockOffset = 0, sosSize = 10;
     let gameType = 'bingo', sosCells = Array(100).fill(''), sosPoints = [0,0], sosLines = [], letter = 'S';
     let bot = false, botDifficulty = 'easy', botJob = null;
-    let tttCells = Array(9).fill(''), tttQueue=[[],[]], dotSize=4, dotEdges = Array(40).fill(-1), dotBoxes = Array(16).fill(-1), dotPoints=[0,0];
+    let tttCells = Array(9).fill(''), tttQueue=[[],[]], blinkIndex=-1, dotSize=4, dotEdges = Array(40).fill(-1), dotBoxes = Array(16).fill(-1), dotPoints=[0,0];
     let paused=false, pausedAt=0;
+    let pendingGame=null, proposalSeq=0, gameStarted=false, ruleReady=[false,false], ruleLocalReady=false;
+    let seenRules=[], resultAt=0, resultTimer=null, resultTick=null, resultBoards=[];
+    let chatLog=[],chatOpen=false,chatUnread=0,lastChatSent=0;
     const isExtra = () => gameType==='dots'||gameType==='ttt';
     function copyRoom() { if(roomId) navigator.clipboard?.writeText(roomId).then(()=>{document.getElementById('gameRoom').title='Copied!'}).catch(()=>{}); }
     function showRoom() { document.getElementById('gameRoom').classList.toggle('hidden',!isOnline||!roomId);document.getElementById('gameRoomCode').textContent=roomId||''; }
@@ -809,12 +1029,28 @@
       document.getElementById('letterS').classList.toggle('gold',v==='S');
       document.getElementById('letterO').classList.toggle('gold',v==='O');
     }
+    function setTimer(seconds,mode='running'){
+      const ring=document.getElementById('timerPill'),arc=document.getElementById('timerArc'),label=document.getElementById('timerValue');
+      const max=turnSeconds||15;
+      if(mode!=='running'){
+        ring.className='timer-ring waiting';label.textContent=mode==='ready'?'READY':mode==='end'?'END':'WAIT';
+        arc.style.strokeDashoffset='131.95';ring.setAttribute('aria-valuenow','0');ring.setAttribute('aria-label',mode==='ready'?'Waiting for your ready confirmation':mode==='end'?'Game over':'Waiting for other player');return;
+      }
+      const remaining=Math.max(0,Math.min(max,Number(seconds)||0));
+      const ratio=remaining/max;
+      ring.className='timer-ring'+(ratio<=.2?' urgent':ratio<=.5?' warning':'');
+      label.textContent=String(Math.ceil(remaining));
+      arc.style.strokeDashoffset=String(131.95*(1-ratio));
+      ring.setAttribute('aria-valuemax',String(max));ring.setAttribute('aria-valuenow',String(Math.ceil(remaining)));
+      ring.setAttribute('aria-label',Math.ceil(remaining)+' seconds remaining');
+    }
     function startClock() {
       if (timerHandle) clearInterval(timerHandle);
+      setTimer(Math.max(0,(deadline+clockOffset-Date.now())/1000));
       timerHandle = setInterval(() => {
-        if (paused || gameOver || !document.getElementById('gameScreen').classList.contains('active')) return;
+        if (paused || gameOver || !ruleReady.every(Boolean) || !document.getElementById('gameScreen').classList.contains('active')) return;
         const remain = Math.max(0,Math.ceil((deadline+clockOffset-Date.now())/1000));
-        document.getElementById('timerPill').textContent = remain+'s';
+        setTimer(Math.max(0,(deadline+clockOffset-Date.now())/1000));
         if (!remain && (!isOnline || host)) {
           deadline = Date.now()+turnSeconds*1000; // prevent duplicate timeout during this tick
           if (isExtra()) { const free=gameType==='ttt'?tttCells.map((v,i)=>v?-1:i).filter(i=>i>=0):dotEdges.map((v,i)=>v!==-1?-1:i).filter(i=>i>=0);if(free.length)applyExtra(free[Math.floor(Math.random()*free.length)]); }
@@ -828,7 +1064,7 @@
         }
       },200);
     }
-    function nextDeadline() { deadline=Date.now()+turnSeconds*1000; clockOffset=0; startClock(); }
+    function nextDeadline() { if(!ruleReady.every(Boolean))return;deadline=Date.now()+turnSeconds*1000;clockOffset=0; startClock(); }
     function readyRematch() {
       if (!gameOver || rematchReady[myRole]) return;
       if (bot) {beginRematch();return;}
@@ -852,7 +1088,7 @@
       if (n===2 && (!isOnline || host)) beginRematch();
     }
     function beginRematch() {
-      round++; rematchReady=[false,false]; savedResult=false; winnerRole=-1; finalLines=[0,0];
+      clearResult();round++; rematchReady=[false,false]; savedResult=false; winnerRole=-1; finalLines=[0,0];
       document.getElementById('winOverlay').classList.remove('show');
       if (gameType==='sos') { startSOS(); return; }
       if (isExtra()) { startExtra(); return; }
@@ -896,9 +1132,27 @@
       });
       Array.from(grid.children).forEach((cell,i)=>cell.classList.toggle('in-line',highlighted.has(i)));
     }
+    function renderScoreStrip(id,values,unit,totalLabel,maximum){
+      const strip=document.getElementById(id);strip.className='score-strip';strip.replaceChildren();
+      [0,1].forEach(p=>{
+        const card=document.createElement('div');card.className='score-card player-'+(p+1)+(current===p&&!gameOver?' playing':'');
+        const label=document.createElement('span');label.className='score-name';label.textContent=names[p]+':';
+        const count=document.createElement('strong');count.className='score-count';count.textContent=String(values[p]||0);
+        const suffix=document.createElement('span');suffix.className='score-unit';suffix.textContent=(values[p]===1?(unit==='boxes'?'box':unit==='words'?'word':unit):unit);
+        card.setAttribute('aria-label',names[p]+': '+(values[p]||0)+' '+suffix.textContent);
+        card.append(label,count,suffix);strip.append(card);
+      });
+      const total=document.createElement('div');total.className='score-total';
+      const label=document.createElement('span');label.textContent=totalLabel==='TOTAL BOXES'?'Total:':'Total SOS:';
+      const count=document.createElement('strong');count.textContent=String((values[0]||0)+(values[1]||0));
+      const capacity=document.createElement('small');capacity.textContent=maximum?'/ '+maximum+' boxes':(values[0]+values[1]===1?'word':'words');
+      total.append(label,count,capacity);strip.append(total);
+    }
     function renderSOS() {
       const grid=document.getElementById('sosGrid');
-      const width=sosSize===30?32:Math.max(29,Math.min(sosSize===5?58:48,Math.floor((window.innerWidth-38-3*(sosSize-1))/sosSize)));
+      const area=document.getElementById('sosArea');
+      const available=Math.min(window.innerWidth-28,area.clientWidth||window.innerWidth-28);
+      const width=sosSize===30?32:Math.max(18,Math.min(sosSize===5?58:48,Math.floor((available-12-3*(sosSize-1))/sosSize)));
       grid.style.gridTemplateColumns=`repeat(${sosSize}, ${width}px)`;
       const changed=grid.children.length!==sosCells.length;
       if(changed) {
@@ -908,29 +1162,28 @@
           b.style.width=width+'px';b.style.height=width+'px';b.style.fontSize=(sosSize===30?'19px':'clamp(17px,5vw,30px)');
           b.setAttribute('aria-label','SOS cell '+(Math.floor(i/sosSize)+1)+', '+(i%sosSize+1));
           b.onclick=()=>{
-            if(gameOver||paused||sosCells[i]||bot&&current===1||isOnline&&(myRole!==current||!conn?.open))return;
+            if(gameOver||paused||!ruleReady.every(Boolean)||sosCells[i]||bot&&current===1||isOnline&&(myRole!==current||!conn?.open))return;
             if(isOnline&&!host)send({type:'SOS_MOVE',index:i,letter});else applySOS(i,letter);
           };frag.appendChild(b);
         });grid.appendChild(frag);
       }
       Array.from(grid.children).forEach((b,i)=>{b.textContent=sosCells[i]||'·';b.className='sos-cell '+(sosCells[i]==='S'?'filled-s':sosCells[i]==='O'?'filled-o':'empty'); b.style.width=width+'px';b.style.height=width+'px';b.disabled=!!sosCells[i]||gameOver;});
       document.getElementById('sosNames').textContent=names[0]+' vs '+names[1];
-      const scores=document.getElementById('sosPoints');scores.replaceChildren();
-      [0,1].forEach(p=>{const badge=document.createElement('span');badge.textContent=names[p]+': '+sosPoints[p]+(current===p&&!gameOver?' • PLAYING':'');badge.style.cssText='display:inline-block;padding:8px 12px;margin:4px;border-radius:10px;border:2px solid '+(current===p&&!gameOver?(p===0?'#38bdf8':'#fb7185'):'transparent')+';background:'+(current===p&&!gameOver?'#ffffff22':'transparent');scores.append(badge);});
+      renderScoreStrip('sosPoints',sosPoints,'words','TOTAL SOS');
       document.getElementById('sosArea').classList.remove('hidden');
       drawSOSLines();
       document.getElementById('bingoBoards').classList.add('hidden');document.getElementById('bingoCalls').classList.add('hidden');
     }
     function startSOS() {
       gameOver=false;current=0;sosCells=Array(sosSize*sosSize).fill('');sosLines=[];sosPoints=[0,0];calledOrder=[];called.clear();
-      showScreen('gameScreen');nextDeadline();updateGameUI();save();sync();
+      showScreen('gameScreen');updateGameUI();prepareRules();save();sync();
     }
     function applySOS(i,v) {
-      if(gameType!=='sos'||gameOver||paused||!Number.isInteger(i)||i<0||i>=sosSize*sosSize||sosCells[i]||!['S','O'].includes(v))return;
+      if(gameType!=='sos'||gameOver||paused||!ruleReady.every(Boolean)||!Number.isInteger(i)||i<0||i>=sosSize*sosSize||sosCells[i]||!['S','O'].includes(v))return;
       sosCells[i]=v;const formed=sosScoreAt(i);formed.forEach(cells=>sosLines.push({cells,player:current}));const gained=formed.length;sosPoints[current]+=gained;
       if(sosCells.every(Boolean)) {
         gameOver=true;winnerRole=sosPoints[0]===sosPoints[1]?-1:sosPoints[0]>sosPoints[1]?0:1;
-        finalLines=[...sosPoints];updateGameUI();showWin(winnerRole);save();sync();return;
+        finalLines=[...sosPoints];resultAt=Date.now()+5000;updateGameUI();queueResult();save();sync();return;
       }
       if(!gained)current=1-current;
       nextDeadline();updateGameUI();save();sync();scheduleBot();
@@ -956,7 +1209,26 @@
       savedResult = true;
       const rows = scoreRows();
       rows.push({date:new Date().toISOString(), matchId, round, gameType, bingoSize:SIZE, names:[...names], winner:winnerRole, lines:[...finalLines], calls:calledOrder.length, mode:isOnline?'Online':'Same PC'});
-      localStorage.setItem(SCORES, JSON.stringify(rows)); save();
+      localStorage.setItem(SCORES, JSON.stringify(rows));renderLobbyScores();save();
+    }
+    function tableFor(headers,items,optional=[]) {
+      const wrap=document.createElement('div');wrap.className='score-wrap';
+      const table=document.createElement('table');table.className='score-table';
+      const head=table.createTHead().insertRow();headers.forEach((name,i)=>{const th=document.createElement('th');th.textContent=name;if(optional.includes(i))th.className='optional';head.append(th);});
+      const body=table.createTBody();items.forEach(item=>{const tr=body.insertRow();item.forEach((value,i)=>{const td=tr.insertCell();td.textContent=String(value);if(optional.includes(i))td.className='optional';});});wrap.append(table);return wrap;
+    }
+    function renderLobbyScores(){
+      const box=document.getElementById('mainScores');if(!box)return;box.replaceChildren();
+      const rows=scoreRows();if(!rows.length){box.textContent='No completed games yet. Play a match to appear here.';return;}
+      const standing=new Map();rows.forEach(row=>{
+        if(!Array.isArray(row.names))return;
+        row.names.forEach((name,p)=>{const key=String(name).trim().toLocaleLowerCase(),v=standing.get(key)||{name,played:0,wins:0,draws:0};v.played++;if(row.winner===p)v.wins++;if(row.winner<0)v.draws++;standing.set(key,v);});
+      });
+      const leaderboard=[...standing.values()].sort((a,b)=>(b.wins*3+b.draws)-(a.wins*3+a.draws)||b.wins-a.wins).slice(0,20);
+      const rank=document.createElement('h3');rank.className='score-title';rank.textContent='Player standings';box.append(rank,tableFor(['#','Player','Played','Wins','Draws','Points'],leaderboard.map((x,i)=>[i+1,x.name,x.played,x.wins,x.draws,x.wins*3+x.draws]),[2,4]));
+      const title=document.createElement('h3');title.className='score-title';title.textContent='Recent results';box.append(title);
+      const labels={bingo:'Bingo',sos:'SOS',dots:'Dots & Boxes',ttt:'Tic-Tac-Toe'};
+      box.append(tableFor(['Round','Game','Players','Winner','Score','Date'],rows.slice(-20).reverse().map(r=>[r.round||1,labels[r.gameType]||'Bingo',(r.names||[]).join(' vs '),r.winner<0?'Draw':r.names?.[r.winner]||'—',(r.lines||[]).join(' : '),new Date(r.date).toLocaleDateString()]),[2,4,5]));
     }
     function displayScoreboard() {
       const box = document.getElementById('scoreboard'); box.replaceChildren();
@@ -973,7 +1245,7 @@
     function downloadScores() {
       const escape=v=>'"'+String(v).replace(/"/g,'""')+'"';
       const rows=[['Date','Match ID','Round','Game','Bingo Board','Mode','Player 1','Player 2','Winner','Player 1 Score','Player 2 Score','Numbers Called']];
-      scoreRows().forEach(x=>rows.push([x.date,x.matchId||'',x.round||1,x.gameType||'bingo',x.gameType==='sos'?'':((x.bingoSize||5)+'x'+(x.bingoSize||5)),x.mode,x.names[0],x.names[1],x.winner<0?'Draw':x.names[x.winner],x.lines[0],x.lines[1],x.calls]));
+      scoreRows().forEach(x=>rows.push([x.date,x.matchId||'',x.round||1,x.gameType||'bingo',x.gameType==='bingo'?((x.bingoSize||5)+'x'+(x.bingoSize||5)):'',x.mode,x.names[0],x.names[1],x.winner<0?'Draw':x.names[x.winner],x.lines[0],x.lines[1],x.calls]));
       const blob=new Blob(['\uFEFF'+rows.map(row=>row.map(escape).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
       const url=URL.createObjectURL(blob), a=document.createElement('a');a.href=url;a.download='bingo-scores.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
@@ -985,7 +1257,107 @@
     const STORE = "bingo-battle-session-v2";
     const validBoard = b => Array.isArray(b) && b.length === SIZE && b.every(row => Array.isArray(row) && row.length === SIZE) && new Set(b.flat()).size === SIZE*SIZE && b.flat().every(n => Number.isInteger(n) && n >= 1 && n <= SIZE*SIZE);
     function save() {
-      localStorage.setItem(STORE, JSON.stringify({bingoSize:SIZE, isOnline, host, myRole, roomId, manualGrid, myBoard, boards, bothReady, current, calledOrder, gameOver, names, winnerRole, finalLines, savedResult, round, matchId, rematchReady, deadline, turnSeconds, sosSize, gameType, sosCells, sosLines, sosPoints, bot, botDifficulty, tttCells, tttQueue, dotSize, dotEdges, dotBoxes, dotPoints, paused, pausedAt, screen: document.querySelector('.screen.active')?.id}));
+      localStorage.setItem(STORE, JSON.stringify({bingoSize:SIZE, isOnline, host, myRole, roomId, manualGrid, myBoard, boards, bothReady, current, calledOrder, gameOver, names, winnerRole, finalLines, savedResult, round, matchId, rematchReady, pendingGame, proposalSeq, gameStarted, ruleReady, ruleLocalReady, seenRules, resultAt, resultBoards, chatLog, deadline, turnSeconds, sosSize, gameType, sosCells, sosLines, sosPoints, bot, botDifficulty, tttCells, tttQueue, dotSize, dotEdges, dotBoxes, dotPoints, paused, pausedAt, screen: document.querySelector('.screen.active')?.id}));
+    }
+    function clearResult(){
+      if(resultTimer){clearTimeout(resultTimer);resultTimer=null;}
+      if(resultTick){clearInterval(resultTick);resultTick=null;}
+      document.getElementById('resultNotice').classList.add('hidden');
+      document.getElementById('winOverlay').classList.remove('show');
+      resultAt=0;resultBoards=[];clockOffset=0;
+    }
+    function backStep(){
+      if(!isOnline){leaveGame();return;}
+      if(document.getElementById('roomScreen').classList.contains('active')){leaveGame();return;}
+      if(host)returnRoomHost();else{send({type:'RETURN_ROOM'});showRoomScreen();}
+    }
+    function updateRoomFields(){
+      const game=document.getElementById('roomGame').value;
+      ['bingo','sos','dots'].forEach(type=>document.querySelector('.room-'+type).classList.toggle('hidden',game!==type));
+    }
+    function renderRoom(){
+      document.getElementById('sharedRoomCode').textContent=roomId||'------';
+      document.getElementById('sharedPlayers').textContent=names.join(' • ')+(conn?.open?' • connected':' • waiting for connection');
+      const info=document.getElementById('roomProposal'),accept=document.getElementById('acceptButton'),decline=document.getElementById('declineButton');
+      const proposal=pendingGame;
+      if(!proposal){info.textContent='Choose a game to suggest. Both players must agree.';accept.classList.add('hidden');decline.classList.add('hidden');}
+      else {
+        const labels={bingo:'Bingo',sos:'SOS',dots:'Dots & Boxes',ttt:'Tic-Tac-Toe'};
+        info.textContent=names[proposal.proposer]+' suggests '+labels[proposal.game]+' • '+proposal.turnSeconds+' seconds'+(proposal.game==='sos'?' • '+proposal.sosSize+'×'+proposal.sosSize:proposal.game==='bingo'?' • '+proposal.bingoSize+'×'+proposal.bingoSize:proposal.game==='dots'?' • '+proposal.dotSize+'×'+proposal.dotSize+' boxes':'');
+        accept.classList.toggle('hidden',proposal.proposer===myRole);decline.classList.toggle('hidden',proposal.proposer===myRole);
+      }
+      document.getElementById('proposeButton').disabled=!conn?.open;
+    }
+    function showRoomScreen(){
+      clearResult();hideRules();
+      showScreen('roomScreen');renderRoom();save();
+    }
+    function returnRoomHost(){
+      if(!host)return;pendingGame=null;ruleReady=[false,false];ruleLocalReady=false;
+      showRoomScreen();sync();
+    }
+    function makeProposal(){
+      return {game:document.getElementById('roomGame').value,turnSeconds:Number(document.getElementById('roomTimer').value),bingoSize:Number(document.getElementById('roomBingo').value),sosSize:Number(document.getElementById('roomSos').value),dotSize:Number(document.getElementById('roomDots').value)};
+    }
+    function validProposal(p){return p&&['bingo','sos','dots','ttt'].includes(p.game)&&[15,30,60].includes(p.turnSeconds)&&[5,10].includes(p.bingoSize)&&[5,10].includes(p.sosSize)&&[3,4,5,10].includes(p.dotSize);}
+    function proposeGame(){
+      if(!isOnline||!conn?.open)return;
+      const p=makeProposal();if(!validProposal(p))return;
+      if(host){pendingGame={...p,proposer:0,id:++proposalSeq};renderRoom();save();sync();}
+      else send({type:'PROPOSE',proposal:p});
+    }
+    function declineGame(){
+      if(!pendingGame||pendingGame.proposer===myRole)return;
+      if(host){pendingGame=null;renderRoom();sync();save();}else send({type:'DECLINE',id:pendingGame.id});
+    }
+    function acceptGame(){
+      if(!pendingGame||pendingGame.proposer===myRole)return;
+      if(host)launchProposal(pendingGame.id);else send({type:'ACCEPT',id:pendingGame.id});
+    }
+    function launchProposal(id){
+      if(!host||!pendingGame||pendingGame.id!==id)return;
+      const p=pendingGame;pendingGame=null;
+      clearResult();if(gameStarted)round++;gameStarted=true;
+      gameType=p.game;turnSeconds=p.turnSeconds;sosSize=p.sosSize;dotSize=p.dotSize;setBingoSize(p.bingoSize);chooseGame(gameType);
+      gameOver=false;winnerRole=-1;savedResult=false;myBoard=null;boards=[null,null];bothReady=[false,false];ruleReady=[false,false];ruleLocalReady=false;
+      if(gameType==='bingo') {showScreen('setupScreen');resetEditor(null);autoShuffle();save();sync();}
+      else if(gameType==='sos')startSOS();else startExtra();
+    }
+    function ruleText(){
+      if(gameType==='bingo')return `Arrange your ${SIZE}×${SIZE} board, then take turns calling numbers. A call marks both boards. Complete five lines to win.`;
+      if(gameType==='sos')return `On the ${sosSize}×${sosSize} grid, place S or O to form S-O-S in any direction. Each new word earns a point and another turn. Most points wins.`;
+      if(gameType==='dots')return `Tap a line between dots. Close a box to score and keep your turn. The player with more boxes wins.`;
+      return 'Each player keeps three pieces. A fourth placement makes that player’s oldest piece vanish. Form three in a row to win.';
+    }
+    function hideRules(){document.getElementById('rulesOverlay').classList.remove('show');document.getElementById('rulesOverlay').setAttribute('aria-hidden','true');}
+    function showRules(){
+      if(gameOver||ruleReady.every(Boolean)){hideRules();return;}
+      if(seenRules.includes(gameType)&&!ruleLocalReady){readyForGame();return;}
+      if(ruleLocalReady){hideRules();setTimer(0,'wait');return;}
+      const titles={bingo:'Bingo',sos:'SOS',dots:'Dots & Boxes',ttt:'Disappearing Tic-Tac-Toe'};
+      document.getElementById('rulesTitle').textContent=titles[gameType];document.getElementById('rulesText').textContent=ruleText();
+      document.getElementById('rulesReadyButton').disabled=ruleLocalReady;
+      document.getElementById('rulesWait').textContent=ruleLocalReady?'Waiting for the other player…':'';
+      document.getElementById('rulesOverlay').classList.add('show');document.getElementById('rulesOverlay').setAttribute('aria-hidden','false');
+      setTimer(0,'ready');
+    }
+    function readyForGame(){
+      if(ruleLocalReady)return;ruleLocalReady=true;if(!seenRules.includes(gameType))seenRules.push(gameType);
+      if(!isOnline){ruleReady=[true,true];activateRules();}
+      else if(host){ruleReady[0]=true;activateRules();sync();}
+      else{send({type:'RULE_READY'});showRules();}
+      save();
+    }
+    function activateRules(){
+      if(ruleReady.every(Boolean)){
+        hideRules();if(!deadline){deadline=Date.now()+turnSeconds*1000;clockOffset=0;}
+        startClock();save();if(isOnline&&host)sync();
+      } else showRules();
+    }
+    function prepareRules(){
+      clearResult();ruleReady=[false,false];ruleLocalReady=false;deadline=0;
+      if(timerHandle){clearInterval(timerHandle);timerHandle=null;}
+      showRules();
     }
     function leaveGame() {
       localStorage.removeItem(STORE);
@@ -1016,7 +1388,9 @@
       called = new Set(calledOrder);
       document.getElementById('modeInfo').textContent = isOnline ? 'MODE: ONLINE LIVE' : 'MODE: SAME PC';
       chooseGame(gameType);setPauseUI();
-      if (state.screen === 'gameScreen' && (gameType==='sos' || isExtra() || (isOnline ? validBoard(boards[myRole]) : boards.every(validBoard)))) restoreGame();
+      pendingGame=state.pendingGame||null;proposalSeq=state.proposalSeq||0;gameStarted=!!state.gameStarted;ruleReady=state.ruleReady||[true,true];ruleLocalReady=!!state.ruleLocalReady;seenRules=Array.isArray(state.seenRules)?state.seenRules:[];resultAt=state.resultAt||0;resultBoards=Array.isArray(state.resultBoards)?state.resultBoards:[];chatLog=Array.isArray(state.chatLog)?state.chatLog.slice(-100):[];renderChat();
+      if (state.screen === 'roomScreen')showRoomScreen();
+      else if (state.screen === 'gameScreen' && (gameType==='sos' || isExtra() || (isOnline ? validBoard(boards[myRole]) : boards.every(validBoard)))) restoreGame();
       else if (state.screen === 'setupScreen') { showScreen('setupScreen'); resetEditor(state.manualGrid); }
       if (isOnline && roomId) {
         showRoom();showOnlineMenu();
@@ -1025,14 +1399,14 @@
       }
     }
     function restoreGame() {
-      if (gameType==='sos'||isExtra()) {showScreen('gameScreen');updateGameUI();startClock();if(gameOver)showWin(winnerRole);else scheduleBot();return;}
+      if (gameType==='sos'||isExtra()) {showScreen('gameScreen');updateGameUI();if(gameOver)queueResult();else{activateRules();scheduleBot();}return;}
       if (!validBoard(boards[myRole]) && isOnline || !isOnline && !boards.every(validBoard)) return;
       marked = [0, 1].map(p => validBoard(boards[p]) ? boards[p].map(row => row.map(n => called.has(n))) : Array.from({length:SIZE},()=>Array(SIZE).fill(false)));
       showScreen('gameScreen');
       buildGameBoards(); updateGameUI();
-      startClock(); if (gameOver) showWin(winnerRole);
+      if(gameOver)queueResult();else activateRules();
     }
-    function snapshot() { return {type:'STATE', bingoSize:SIZE, boards:[null,boards[1]], bothReady, current, calledOrder, gameOver, names, winnerRole, finalLines, round, matchId, rematchReady, deadline, sentAt:Date.now(), turnSeconds, sosSize, gameType, sosCells, sosLines, sosPoints, tttCells, tttQueue, dotSize, dotEdges, dotBoxes, dotPoints, screen: document.querySelector('.screen.active')?.id}; }
+    function snapshot() { return {type:'STATE', pendingGame, proposalSeq, gameStarted, ruleReady, resultAt, resultBoards:(gameOver&&gameType==='bingo'?boards.map((b,p)=>winnerRole<0||p===winnerRole?b:null):[]), bingoSize:SIZE, boards:[null,boards[1]], bothReady, current, calledOrder, gameOver, names, winnerRole, finalLines, round, matchId, rematchReady, deadline, sentAt:Date.now(), turnSeconds, sosSize, gameType, sosCells, sosLines, sosPoints, tttCells, tttQueue, dotSize, dotEdges, dotBoxes, dotPoints, screen: document.querySelector('.screen.active')?.id}; }
     function sync() { if (isOnline && host) send(snapshot()); }
 
 
@@ -1058,9 +1432,10 @@
     function startSamePC() {
       isOnline = false; host = true; myRole = 0;bot=false;
       dotSize=Number(document.getElementById('dotsChoice').value);setBingoSize(Number(document.getElementById('bingoChoice').value));gameType=document.getElementById('gameChoice').value;turnSeconds=Number(document.getElementById('turnChoice').value);sosSize=Number(document.getElementById('sizeChoice').value);matchId=crypto.randomUUID?.()||String(Date.now());round=1;
-      names = [nameInput('playerName','Player 1'),nameInput('secondName','Player 2')]; labelNames();
+      seenRules=[];names = [nameInput('playerName','Player 1'),nameInput('secondName','Player 2')]; labelNames();
       boards = [null, null]; bothReady = [false, false];
       document.getElementById('modeInfo').textContent = 'MODE: SAME PC';
+      gameStarted=true;
       if(gameType==='sos'){startSOS();return;}
       if(isExtra()){startExtra();return;}
       showScreen('setupScreen'); resetEditor(null); autoShuffle(); save();
@@ -1070,8 +1445,8 @@
       if (typeof Peer === 'undefined') { status('PeerJS unavailable. Check internet connection.'); return; }
       isOnline = true; host = true; myRole = 0;bot=false;
       dotSize=Number(document.getElementById('dotsChoice').value);setBingoSize(Number(document.getElementById('bingoChoice').value));gameType=document.getElementById('gameChoice').value;turnSeconds=Number(document.getElementById('turnChoice').value);sosSize=Number(document.getElementById('sizeChoice').value);matchId=crypto.randomUUID?.()||String(Date.now());round=1;
-      names[0] = nameInput('playerName','Player 1'); labelNames();
-      roomId = generateId();showRoom();
+      chatLog=[];chatUnread=0;chatOpen=false;seenRules=[];names[0] = nameInput('playerName','Player 1'); labelNames();
+      roomId = generateId();showRoom();showRoomScreen();
       document.getElementById('createBox').classList.add('show');
       document.getElementById('joinBox').classList.remove('show');
       openHost(roomId); save();
@@ -1090,8 +1465,8 @@
       const id = document.getElementById('joinInput').value.trim().toUpperCase();
       if (id.length !== 6) { status('Enter a six-character Room ID.'); return; }
       isOnline = true; host = false; myRole = 1; roomId = id;bot=false;showRoom();
-      names[1] = nameInput('playerName','Player 2'); labelNames();
-      openGuest(id); save();
+      chatLog=[];chatUnread=0;chatOpen=false;seenRules=[];names[1] = nameInput('playerName','Player 2'); labelNames();
+      showRoomScreen();openGuest(id);save();
     }
     function openGuest(id) {
       if (typeof Peer === 'undefined') { status('PeerJS unavailable. Check internet connection.'); return; }
@@ -1111,58 +1486,90 @@
     }
 
     function setupConnection() {
-      conn.on('open', () => {
+      conn.on('open',()=>{
         status('Live Connection Established');
-        if (host) {
-          if (gameType==='sos') {if(!document.getElementById('gameScreen').classList.contains('active'))startSOS();}
-          else if(isExtra()) {if(!document.getElementById('gameScreen').classList.contains('active'))startExtra();}
-          else if (!boards.every(validBoard) && !document.getElementById('setupScreen').classList.contains('active')) {
-            showScreen('setupScreen'); resetEditor(myBoard); if (!myBoard) autoShuffle();
-          }
-          sync();
-        } else {
-          send({type:'HELLO', board: myBoard, name:names[1]});
-          if (!boards.every(validBoard) && !document.getElementById('setupScreen').classList.contains('active')) {
-            showScreen('setupScreen'); resetEditor(myBoard); if (!myBoard) autoShuffle();
-          }
-        }
-        save();
+        if(host){if(document.getElementById('lobbyScreen').classList.contains('active'))showRoomScreen();sync();}
+        else{send({type:'HELLO',board:myBoard,name:names[1]});if(document.getElementById('lobbyScreen').classList.contains('active'))showRoomScreen();}
+        renderRoom();renderChat();save();
       });
-      conn.on('data', handleData);
-      conn.on('close', () => status('Other player disconnected. Waiting for reconnect; your game is saved.'));
-      conn.on('error', err => status('Connection error: ' + err.message));
+      conn.on('data',handleData);
+      conn.on('close',()=>{status('Other player disconnected. Waiting for reconnect; your game is saved.');chatOpen=false;renderRoom();renderChat();});
+      conn.on('error',err=>status('Connection error: '+err.message));
     }
     function send(data) { if (conn && conn.open) conn.send(data); }
+    function renderChat(){
+      const widget=document.getElementById('chatWidget');widget.classList.toggle('hidden',!isOnline||!conn?.open);
+      const panel=document.getElementById('chatPanel'),button=document.getElementById('chatToggle');
+      panel.classList.toggle('hidden',!chatOpen);button.setAttribute('aria-expanded',String(chatOpen));button.setAttribute('aria-label',chatOpen?'Close room chat':'Open room chat');
+      const badge=document.getElementById('chatBadge');badge.classList.toggle('hidden',!chatUnread||chatOpen);badge.textContent=chatUnread>9?'9+':String(chatUnread);
+      document.getElementById('chatSubtitle').textContent='You & '+names[1-myRole]+' • '+roomId;
+      const box=document.getElementById('chatMessages');box.replaceChildren();
+      if(!chatLog.length){const empty=document.createElement('p');empty.className='chat-empty';empty.textContent='Messages are shared only with your current opponent.';box.append(empty);}
+      chatLog.forEach(msg=>{
+        const item=document.createElement('div');item.className='chat-message'+(msg.role===myRole?' mine':'');
+        const who=document.createElement('span');who.className='who';who.textContent=msg.role===myRole?'You':names[msg.role]||'Player';
+        const text=document.createElement('span');text.className='text';text.textContent=msg.text;
+        const time=document.createElement('span');time.className='time';time.textContent=new Date(msg.at||Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        item.append(who,text,time);box.append(item);
+      });
+      if(chatOpen)box.scrollTop=box.scrollHeight;
+    }
+    function toggleChat(force){
+      if(!isOnline||!conn?.open)return;
+      chatOpen=typeof force==='boolean'?force:!chatOpen;
+      if(chatOpen)chatUnread=0;renderChat();
+      if(chatOpen)document.getElementById('chatInput').focus();else document.getElementById('chatToggle').focus();
+    }
+    function sendChat(event){
+      event.preventDefault();const input=document.getElementById('chatInput');
+      const text=input.value.trim().slice(0,400);if(!text||!conn?.open||!isOnline)return;
+      const now=Date.now();if(now-lastChatSent<500)return;lastChatSent=now;
+      const msg={type:'CHAT',id:now+'-'+Math.random().toString(36).slice(2,10),roomId,role:myRole,text,at:now};
+      chatLog.push(msg);chatLog=chatLog.slice(-100);input.value='';renderChat();save();send(msg);
+    }
+    function receiveChat(msg){
+      if(!isOnline||!conn?.open||msg.roomId!==roomId||msg.role!==1-myRole||typeof msg.id!=='string'||msg.id.length>80||typeof msg.text!=='string'||!msg.text.trim()||msg.text.length>400||chatLog.some(x=>x.id===msg.id))return;
+      chatLog.push({id:msg.id,role:msg.role,text:msg.text.trim(),at:Number.isFinite(msg.at)?msg.at:Date.now()});chatLog=chatLog.slice(-100);
+      if(!chatOpen)chatUnread=Math.min(99,chatUnread+1);renderChat();save();
+    }
     function handleData(data) {
       if (!data || typeof data !== 'object') return;
+      if (data.type === 'CHAT') {receiveChat(data);return;}
       if (data.type === 'HELLO' && host) {
         if (typeof data.name === 'string') names[1] = data.name.slice(0,24) || 'Player 2';
         labelNames();
-        if (gameType==='sos' && !document.getElementById('gameScreen').classList.contains('active'))startSOS();
-        if (isExtra() && !document.getElementById('gameScreen').classList.contains('active'))startExtra();
-        if (validBoard(data.board) && !boards.every(validBoard)) { boards[1] = data.board; bothReady[1] = true; updateReady(); }
+        if (gameType==='bingo'&&document.getElementById('setupScreen').classList.contains('active')&&validBoard(data.board) && !boards.every(validBoard)) { boards[1] = data.board; bothReady[1] = true; updateReady(); }
         sync();
       }
-      if (data.type === 'BOARD_READY' && host && validBoard(data.board)) {
+      if (data.type === 'BOARD_READY' && host && gameType==='bingo' && document.getElementById('setupScreen').classList.contains('active') && validBoard(data.board)) {
         boards[1] = data.board; bothReady[1] = true; updateReady(); sync(); save();
       }
       if (data.type === 'STATE' && !host) {
         if (!Array.isArray(data.boards) || !Array.isArray(data.calledOrder)) return;
-        if (data.round > round) { myBoard=null; savedResult=false; document.getElementById('winOverlay').classList.remove('show'); }
+        if (data.round > round) {myBoard=null;savedResult=false;ruleLocalReady=false;clearResult();}
         setBingoSize(data.bingoSize);
         boards = [null, data.boards[1]]; bothReady = data.bothReady; current = data.current;
-        gameType=data.gameType||'bingo';round=data.round||1;matchId=data.matchId;rematchReady=data.rematchReady||[false,false];deadline=data.deadline||0;clockOffset=Date.now()-(data.sentAt||Date.now());turnSeconds=[15,30,60].includes(data.turnSeconds)?data.turnSeconds:15;sosSize=[5,10,30].includes(data.sosSize)?data.sosSize:10;sosCells=data.sosCells||Array(sosSize*sosSize).fill('');sosLines=Array.isArray(data.sosLines)?data.sosLines:[];sosPoints=data.sosPoints||[0,0];tttCells=Array.isArray(data.tttCells)?data.tttCells:Array(9).fill('');dotEdges=Array.isArray(data.dotEdges)?data.dotEdges:Array(40).fill(-1);dotBoxes=Array.isArray(data.dotBoxes)?data.dotBoxes:Array(16).fill(-1);dotPoints=Array.isArray(data.dotPoints)?data.dotPoints:[0,0];dotSize=[3,4,5,10].includes(data.dotSize)?data.dotSize:4;tttQueue=Array.isArray(data.tttQueue)?data.tttQueue:inferTttQueue();
+        const priorQueues=tttQueue.map(q=>[...q]),tttWasVisible=gameType==='ttt'&&document.getElementById('gameScreen').classList.contains('active');
+        gameType=data.gameType||'bingo';round=data.round||1;matchId=data.matchId;rematchReady=data.rematchReady||[false,false];deadline=data.deadline||0;clockOffset=Date.now()-(data.sentAt||Date.now());turnSeconds=[15,30,60].includes(data.turnSeconds)?data.turnSeconds:15;sosSize=[5,10,30].includes(data.sosSize)?data.sosSize:10;sosCells=data.sosCells||Array(sosSize*sosSize).fill('');sosLines=Array.isArray(data.sosLines)?data.sosLines:[];sosPoints=data.sosPoints||[0,0];tttCells=Array.isArray(data.tttCells)?data.tttCells:Array(9).fill('');dotEdges=Array.isArray(data.dotEdges)?data.dotEdges:Array(40).fill(-1);dotBoxes=Array.isArray(data.dotBoxes)?data.dotBoxes:Array(16).fill(-1);dotPoints=Array.isArray(data.dotPoints)?data.dotPoints:[0,0];dotSize=[3,4,5,10].includes(data.dotSize)?data.dotSize:4;tttQueue=Array.isArray(data.tttQueue)?data.tttQueue:inferTttQueue();const mover=tttQueue.findIndex((q,p)=>JSON.stringify(q)!==JSON.stringify(priorQueues[p]));blinkIndex=tttWasVisible&&gameType==='ttt'&&mover>=0&&tttQueue[mover].length===3?tttQueue[mover][0]:-1;
+        pendingGame=data.pendingGame||null;proposalSeq=data.proposalSeq||0;gameStarted=!!data.gameStarted;ruleReady=data.ruleReady||[true,true];resultAt=data.resultAt||0;resultBoards=Array.isArray(data.resultBoards)?data.resultBoards:[];
         names = Array.isArray(data.names) ? data.names : names; winnerRole = data.winnerRole ?? -1; finalLines = data.finalLines || [0,0]; labelNames();
         calledOrder = data.calledOrder; called = new Set(calledOrder); gameOver = data.gameOver;
-        if (data.screen === 'gameScreen' && (gameType==='sos'||isExtra()||validBoard(boards[1]))) restoreGame();
+        if (data.screen === 'roomScreen')showRoomScreen();
+        else if (data.screen === 'gameScreen' && (gameType==='sos'||isExtra()||validBoard(boards[1]))) restoreGame();
         else if (data.screen === 'setupScreen') {
           showScreen('setupScreen'); resetEditor(myBoard);
           if (!myBoard) autoShuffle();
           if (myBoard && bothReady[1]) send({type:'BOARD_READY', board:myBoard});
         }
         if(gameOver) updateRematchDisplay();
+        if(data.screen==='gameScreen'&&!gameOver)activateRules();
         save();
       }
+      if(data.type==='PROPOSE'&&host&&validProposal(data.proposal)){pendingGame={...data.proposal,proposer:1,id:++proposalSeq};renderRoom();save();sync();}
+      if(data.type==='ACCEPT'&&host&&pendingGame?.proposer===0)launchProposal(data.id);
+      if(data.type==='DECLINE'&&host&&pendingGame?.proposer===0&&pendingGame.id===data.id){pendingGame=null;renderRoom();save();sync();}
+      if(data.type==='RETURN_ROOM'&&host)returnRoomHost();
+      if(data.type==='RULE_READY'&&host&&!ruleReady[1]){ruleReady[1]=true;activateRules();sync();save();}
       if (data.type === 'REMATCH_READY' && host && gameOver) {rematchReady[1]=true;updateRematch();sync();save();}
       if (data.type === 'EXTRA_MOVE' && host && isExtra() && current===1) applyExtra(data.index);
       if (data.type === 'SOS_MOVE' && host && gameType==='sos' && current===1) applySOS(data.index,data.letter);
@@ -1297,8 +1704,8 @@
     function startGame() {
       if (!boards.every(validBoard)) return;
       marked = [0, 1].map(() => Array.from({length: SIZE}, () => Array(SIZE).fill(false)));
-      called = new Set(); calledOrder = []; current = 0; gameOver = false; nextDeadline();
-      showScreen('gameScreen'); buildGameBoards(); updateGameUI(); save(); sync();
+      called = new Set(); calledOrder = []; current = 0; gameOver = false;
+      showScreen('gameScreen'); buildGameBoards();updateGameUI();prepareRules();save();sync();
     }
 
     function buildGameBoards() {
@@ -1326,7 +1733,7 @@
     }
 
     function callNumber(p, r, c) {
-      if (gameOver||paused) return;
+      if (gameOver||paused||!ruleReady.every(Boolean)) return;
       if (isOnline && (p !== myRole || current !== myRole || !conn?.open)) return;
       if(bot && current===1)return;
       if (!isOnline && p !== current) return;
@@ -1337,7 +1744,7 @@
     }
 
     function applyCall(num) {
-      if (called.has(num) || gameOver || paused || !boards.every(validBoard)) return;
+      if (called.has(num) || gameOver || paused || !ruleReady.every(Boolean) || !boards.every(validBoard)) return;
       called.add(num);
       calledOrder.unshift(num);
       for (let b = 0; b < 2; b++) {
@@ -1352,7 +1759,7 @@
       const winner = checkWin();
       if (winner !== -1) {
         gameOver = true; winnerRole = winner === 2 ? -1 : winner; finalLines = [lineCount(0),lineCount(1)];
-        updateGameUI(); showWin(winnerRole); save(); sync();
+        resultAt=Date.now()+5000;updateGameUI();queueResult();save();sync();
         return;
       }
       current = 1 - current; nextDeadline();
@@ -1368,6 +1775,7 @@
 
     function updateGameUI() {
       document.getElementById('pauseButton').classList.toggle('hidden',isOnline||gameOver);
+      if(gameOver)setTimer(0,'end');
       document.getElementById('extraArea').classList.toggle('hidden',!isExtra());
       document.getElementById('lastCalled').parentElement.classList.toggle('hidden',gameType!=='bingo');
       if(isExtra()) {showRoom();document.getElementById('sosArea').classList.add('hidden');document.getElementById('bingoBoards').classList.add('hidden');document.getElementById('bingoCalls').classList.add('hidden');document.getElementById('turnPill').textContent=gameOver?'GAME OVER':names[current]+' TURN';document.getElementById('turnPill').className='info-pill turn '+(current===0?'p1':'p2');renderExtra();return;}
@@ -1423,16 +1831,44 @@
       });
     }
 
+    function renderResultBoards(){
+      const panel=document.getElementById('resultBoards');panel.replaceChildren();
+      if(gameType!=='bingo'){panel.classList.add('hidden');return;}
+      const reveal=resultBoards.length?resultBoards:(winnerRole<0?boards:boards.map((b,p)=>p===winnerRole?b:null));
+      reveal.forEach((board,p)=>{
+        if(!validBoard(board))return;
+        const card=document.createElement('div');card.className='result-card';
+        const title=document.createElement('h3');title.textContent=(names[p]||'Player '+(p+1))+' • '+(finalLines[p]||0)+' lines';card.append(title);
+        const grid=document.createElement('div');grid.className='result-grid'+(SIZE===10?' ten':'');grid.style.gridTemplateColumns=`repeat(${SIZE},minmax(0,1fr))`;
+        board.flat().forEach(n=>{const el=document.createElement('div');el.className='result-cell'+(called.has(n)?' called':'');el.textContent=n;grid.append(el);});
+        card.append(grid);panel.append(card);
+      });panel.classList.toggle('hidden',!panel.children.length);
+    }
+    function queueResult(){
+      if(!gameOver||!document.getElementById('gameScreen').classList.contains('active'))return;
+      if(isOnline&&!host&&!conn?.open){const notice=document.getElementById('resultNotice');notice.textContent='Reconnecting to verify the final board…';notice.classList.remove('hidden');return;}
+      recordResult();
+      if(!resultAt)resultAt=Date.now()+5000;
+      const delay=Math.max(0,resultAt+clockOffset-Date.now());
+      if(resultTimer)clearTimeout(resultTimer);if(resultTick)clearInterval(resultTick);
+      const notice=document.getElementById('resultNotice');
+      if(delay>0){
+        const tick=()=>notice.textContent='Final move made. Review the board — result in '+Math.max(1,Math.ceil((resultAt+clockOffset-Date.now())/1000))+' seconds';
+        tick();notice.classList.remove('hidden');resultTick=setInterval(tick,250);
+      }
+      resultTimer=setTimeout(()=>{resultTimer=null;if(resultTick){clearInterval(resultTick);resultTick=null;}notice.classList.add('hidden');if(gameOver&&document.getElementById('gameScreen').classList.contains('active'))showWin(winnerRole);},delay);
+      save();
+    }
     function showWin(winner) {
       if (!isOnline) myRole=0;
       if (winner !== 0 && winner !== 1 && winner !== -1) return;
       const text = document.getElementById("winnerText");
       text.textContent = winner===-1?'DRAW!':names[winner]+' WINS!';
       text.className = winner === 0 ? 'p1' : winner === 1 ? 'p2' : '';
-      recordResult(); displayScoreboard();updateRematchDisplay();
+      recordResult();renderResultBoards();displayScoreboard();updateRematchDisplay();
       document.getElementById("winOverlay").classList.add("show");
     }
-    window.addEventListener('resize',()=>{if(gameType==='sos' && document.getElementById('gameScreen').classList.contains('active')) renderSOS();});
+    window.addEventListener('resize',()=>{if(!document.getElementById('gameScreen').classList.contains('active'))return;if(gameType==='sos')renderSOS();else if(gameType==='dots')renderExtra();});
     // Extra board games: the host (or local browser) is the only state writer.
     const TTT_LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     const boxSides=b=>{const r=Math.floor(b/dotSize),c=b%dotSize,h=dotSize*(dotSize+1);return [r*dotSize+c,(r+1)*dotSize+c,h+r*(dotSize+1)+c,h+r*(dotSize+1)+c+1];};
@@ -1461,28 +1897,36 @@
     function startExtra() {
       if(botJob)clearTimeout(botJob);
       gameOver=false;current=0;winnerRole=-1;finalLines=[0,0];
-      tttCells=Array(9).fill('');tttQueue=[[],[]];dotEdges=Array(2*dotSize*(dotSize+1)).fill(-1);dotBoxes=Array(dotSize*dotSize).fill(-1);dotPoints=[0,0];
-      showScreen('gameScreen');nextDeadline();updateGameUI();save();sync();
+      tttCells=Array(9).fill('');tttQueue=[[],[]];blinkIndex=-1;dotEdges=Array(2*dotSize*(dotSize+1)).fill(-1);dotBoxes=Array(dotSize*dotSize).fill(-1);dotPoints=[0,0];
+      showScreen('gameScreen');updateGameUI();prepareRules();save();sync();
     }
     function renderExtra() {
       const grid=document.getElementById('extraGrid');grid.replaceChildren();
       const heading=document.getElementById('extraTitle'),scores=document.getElementById('extraScores'),help=document.getElementById('extraHelp');
       if(gameType==='ttt') {
         heading.textContent='TIC-TAC-TOE';
-        help.textContent='Each player keeps at most 3 pieces. Placing your 4th removes your oldest. Make 3 in a row to win.';
+        help.textContent='Keep at most 3 pieces. Your oldest briefly blinks after a move; placing a 4th makes it vanish. Remember it!';
         scores.textContent=names[0]+' (X) '+tttQueue[0].length+'/3  vs  '+names[1]+' (O) '+tttQueue[1].length+'/3';
         grid.className='';
         tttCells.forEach((mark,i)=>{
           const button=document.createElement('button');button.type='button';button.className='ttt-cell '+mark.toLowerCase();
-          button.textContent=mark||'·';if(tttQueue[mark==='O'?1:0]?.[0]===i&&mark)button.classList.add('oldest');if(gameOver&&winnerRole>=0&&mark&&TTT_LINES.some(line=>line.includes(i)&&line.every(j=>tttCells[j]===mark)))button.classList.add('win');button.setAttribute('aria-label','Cell '+(i+1)+(mark?' '+mark:''));
+          button.textContent=mark||'·';if(i===blinkIndex&&mark)button.classList.add('warning');if(gameOver&&winnerRole>=0&&mark&&TTT_LINES.some(line=>line.includes(i)&&line.every(j=>tttCells[j]===mark)))button.classList.add('win');button.setAttribute('aria-label','Cell '+(i+1)+(mark?' '+mark:''));
           button.onclick=()=>requestExtra(i);button.disabled=!!mark||gameOver;
           grid.append(button);
         });
+        blinkIndex=-1;
       } else {
         heading.textContent='DOTS & BOXES';
         help.textContent='Tap a line. Complete a box to score and take another turn. Most boxes wins.'+(dotSize===10?' Swipe sideways to view the full 10×10 grid.':'');
-        scores.textContent=names[0]+': '+dotPoints[0]+' boxes • '+names[1]+': '+dotPoints[1]+' boxes';
-        grid.className='dots-grid'+(dotSize===10?' large':'');grid.style.gridTemplateColumns=`repeat(${dotSize*2+1}, max-content)`;
+        renderScoreStrip('extraScores',dotPoints,'boxes','TOTAL BOXES',dotSize*dotSize);
+        grid.className='dots-grid'+(dotSize===10?' large':'');
+        if(dotSize===10){
+          const area=document.getElementById('extraArea');
+          const available=Math.min(window.innerWidth-28,area.clientWidth||window.innerWidth-28);
+          const dot=7,box=Math.max(15,Math.floor((available-(dotSize+1)*dot)/dotSize));
+          grid.style.setProperty('--dot-gap',dot+'px');grid.style.setProperty('--dot-box',box+'px');
+        }
+        grid.style.gridTemplateColumns=`repeat(${dotSize*2+1}, max-content)`;
         for(let y=0;y<dotSize*2+1;y++)for(let x=0;x<dotSize*2+1;x++){
           if(y%2===0&&x%2===0){const dot=document.createElement('div');dot.className='dot';grid.append(dot);continue;}
           if(y%2===1&&x%2===1){const box=document.createElement('div'),owner=dotBoxes[Math.floor(y/2)*dotSize+Math.floor(x/2)];box.className='box '+(owner<0?'':'taken-p'+(owner+1));box.textContent=owner<0?'':Array.from(names[owner].trim())[0]?.toLocaleUpperCase()||'P';box.title=owner<0?'':names[owner]+' owns this box';box.setAttribute('aria-label',owner<0?'Unclaimed box':names[owner]+' owns this box');grid.append(box);continue;}
@@ -1494,16 +1938,17 @@
       }
     }
     function requestExtra(index) {
-      if(paused||gameOver||bot&&current===1||isOnline&&(myRole!==current||!conn?.open))return;
+      if(paused||gameOver||!ruleReady.every(Boolean)||bot&&current===1||isOnline&&(myRole!==current||!conn?.open))return;
       if(isOnline&&!host)send({type:'EXTRA_MOVE',index});else applyExtra(index);
     }
     function applyExtra(index) {
-      if(!isExtra()||gameOver||paused||!Number.isInteger(index))return;
+      if(!isExtra()||gameOver||paused||!ruleReady.every(Boolean)||!Number.isInteger(index))return;
       if(gameType==='ttt') {
         if(index<0||index>=9||tttCells[index])return;
         tttCells[index]=current===0?'X':'O';
         tttQueue[current].push(index);
         if(tttQueue[current].length>3)tttCells[tttQueue[current].shift()]='';
+        blinkIndex=tttQueue[current].length===3?tttQueue[current][0]:-1;
         const won=tttWin(tttCells,current===0?'X':'O');
         if(won){gameOver=true;winnerRole=current;finalLines=tttQueue.map(q=>q.length);}
         else current=1-current;
@@ -1518,7 +1963,7 @@
           gameOver=true;winnerRole=dotPoints[0]===dotPoints[1]?-1:dotPoints[0]>dotPoints[1]?0:1;finalLines=[...dotPoints];
         } else if(!gained)current=1-current;
       }
-      if(gameOver){updateGameUI();showWin(winnerRole);save();sync();return;}
+      if(gameOver){resultAt=Date.now()+5000;updateGameUI();queueResult();save();sync();return;}
       nextDeadline();updateGameUI();save();sync();scheduleBot();
     }
     function randomItem(items){return items[Math.floor(Math.random()*items.length)];}
@@ -1627,18 +2072,18 @@
       return randomItem(scored.filter(x=>x[1]===highest).map(x=>x[0]));
     }
     function scheduleBot(){
-      if(!bot||isOnline||gameOver||paused||current!==1)return;
+      if(!bot||isOnline||gameOver||paused||!ruleReady.every(Boolean)||current!==1)return;
       if(botJob)clearTimeout(botJob);
       botJob=setTimeout(()=>{
-        botJob=null;if(!bot||gameOver||paused||current!==1)return;
+        botJob=null;if(!bot||gameOver||paused||!ruleReady.every(Boolean)||current!==1)return;
         if(gameType==='ttt')applyExtra(botTTT());
         else if(gameType==='dots')applyExtra(botDots());
         else if(gameType==='sos'){const move=botSOS();applySOS(move.i,move.v);}
         else applyCall(botBingo());
       },450);
     }
-    restore();
+    setTimer(turnSeconds);renderLobbyScores();restore();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a4317fc1abe347b3',t:'MTc5MDc1MzE4Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a43ac6cfbe7cefdc',t:'MTc5MDg1MDQ2NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>
